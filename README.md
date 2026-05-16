@@ -1,36 +1,49 @@
 # Semiconductor Defect Analysis
 
-Machine learning starter project for detecting and classifying semiconductor wafer defects using Python and scikit-learn.
+Interactive machine learning project for detecting and classifying semiconductor wafer defects from process and inspection data.
 
-## Project Overview
+## Project Summary
 
-This project trains a supervised model on wafer process and inspection features to classify defect patterns such as scratches, particle defects, edge-ring issues, contamination, and normal wafers. It is designed as a clean baseline that can be extended with real manufacturing data, richer feature engineering, and image-based analysis.
+Semiconductor manufacturing depends on early defect detection to protect yield, reduce scrap, and identify process drift before it reaches production scale. This project builds a supervised machine learning workflow that classifies wafer defect patterns such as scratches, particle defects, edge-ring issues, contamination, and normal wafers.
 
-## Technologies
+The repository includes a training pipeline, synthetic sample wafer data, evaluation outputs, and a Streamlit dashboard for exploring the dataset, training a baseline model, reviewing performance, and testing single-wafer predictions.
+
+## Key Features
+
+- Baseline Random Forest classifier for multi-class defect prediction
+- Data preprocessing for numeric and categorical wafer features
+- Model evaluation with accuracy, precision, recall, macro F1, and confusion matrix
+- Feature importance analysis to highlight likely process drivers
+- Streamlit dashboard for upload, exploration, training, and prediction
+- Starter EDA notebook for exploratory analysis
+
+## Tech Stack
 
 - Python 3.10+
 - pandas and NumPy for data preparation
 - scikit-learn for modeling
-- matplotlib and seaborn for evaluation visuals
-- joblib for saving trained models
+- matplotlib and seaborn for visualization
+- Streamlit for the dashboard
+- joblib for model persistence
 
 ## Project Structure
 
 ```text
 semiconductor-defect-analysis/
-├── data/
-│   └── sample_data.csv
-├── notebooks/
-│   └── exploratory_analysis.ipynb
-├── results/
-│   └── .gitkeep
-├── src/
-│   ├── __init__.py
-│   ├── data_preprocessing.py
-│   ├── evaluation.py
-│   └── model_training.py
-├── requirements.txt
-└── README.md
+|-- data/
+|   `-- sample_data.csv
+|-- notebooks/
+|   `-- exploratory_analysis.ipynb
+|-- results/
+|   `-- .gitkeep
+|-- src/
+|   |-- __init__.py
+|   |-- data_preprocessing.py
+|   |-- evaluation.py
+|   `-- model_training.py
+|-- streamlit_app.py
+|-- requirements.txt
+`-- README.md
 ```
 
 ## Quick Start
@@ -43,21 +56,35 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Train the baseline model with the included sample data:
+Train the baseline model:
 
 ```powershell
 python -m src.model_training --data data/sample_data.csv --output-dir results
 ```
 
-After training, the `results/` folder will contain:
+Run the dashboard:
 
-- `defect_classifier.joblib`
-- `metrics.json`
-- `confusion_matrix.png`
+```powershell
+streamlit run streamlit_app.py
+```
+
+If `streamlit` is not available as a direct command, use:
+
+```powershell
+python -m streamlit run streamlit_app.py
+```
+
+## Dashboard Workflow
+
+1. Load the included synthetic wafer dataset or upload your own CSV.
+2. Review class balance and process-feature relationships.
+3. Train a Random Forest model from the sidebar controls.
+4. Inspect accuracy, macro F1, confusion matrix, and feature importance.
+5. Select an individual wafer in the Prediction Lab to view its predicted defect class.
 
 ## Dataset
 
-The sample dataset is synthetic and meant for development only. Replace `data/sample_data.csv` with real process, metrology, or inspection data before drawing manufacturing conclusions.
+The included dataset is synthetic and intended for project development. Replace `data/sample_data.csv` with real process, metrology, or inspection data before using this workflow for manufacturing decisions.
 
 Expected target column:
 
@@ -76,13 +103,23 @@ Example feature columns:
 - `current_a`
 - `lot_id`
 
-## Next Enhancements
+## Results
 
-- Add real wafer inspection data
-- Expand feature engineering for process drift and tool-level signals
+The training command writes generated artifacts to `results/`:
+
+- `defect_classifier.joblib`
+- `metrics.json`
+- `confusion_matrix.png`
+
+Generated model outputs are ignored by Git so the repository stays lightweight.
+
+## Future Enhancements
+
+- Add real wafer inspection or process-control data
 - Add cross-validation and hyperparameter tuning
-- Add CNN-based image classification for wafer maps or microscope images
-- Build a dashboard for model results and manufacturing quality trends
+- Track model experiments and dataset versions
+- Add wafer-map image classification with CNN models
+- Deploy the Streamlit dashboard for live portfolio access
 
 ## Author
 
