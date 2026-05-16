@@ -25,31 +25,29 @@ This project develops a predictive model that identifies and classifies defects 
 - Performance metrics: accuracy, precision, recall, F1-score
 
 ## 🚀 Project Structure
-production-scheduling-automation/
+semiconductor-defect-analysis/
 ├── README.md
 ├── requirements.txt
 ├── data/
-│   └── production_orders.csv
+│   └── sample_data.csv
 ├── notebooks/
-│   └── scheduling_analysis.ipynb
+│   └── exploratory_analysis.ipynb
 ├── src/
-│   ├── scheduler.py
-│   ├── optimizer.py
-│   └── visualization.py
+│   ├── data_preprocessing.py
+│   ├── model_training.py
+│   └── evaluation.py
 └── results/
-└── gantt_chart.png
-## 📈 Expected Results
+└── performance_metrics.png
 
-- **30-40% reduction** in production lead time
-- **20-25% improvement** in machine utilization
-- **15-20% decrease** in setup costs
+## 📈 Results
+
+*Results will be updated after model development and testing*
 
 ## 🔮 Future Enhancements
 
-- Integration with ERP/MES systems
-- Real-time dynamic rescheduling
-- Predictive maintenance integration
-- Machine learning for demand forecasting
+- Deep learning models (CNN) for image-based defect detection
+- Real-time defect monitoring dashboard
+- Integration with Manufacturing Execution Systems (MES)
 
 ## 👤 Author
 
