@@ -25,3 +25,38 @@ This project develops a predictive model that identifies and classifies defects 
 - Performance metrics: accuracy, precision, recall, F1-score
 
 ## 🚀 Project Structure
+production-scheduling-automation/
+├── README.md
+├── requirements.txt
+├── data/
+│   └── production_orders.csv
+├── notebooks/
+│   └── scheduling_analysis.ipynb
+├── src/
+│   ├── scheduler.py
+│   ├── optimizer.py
+│   └── visualization.py
+└── results/
+└── gantt_chart.png
+## 📈 Expected Results
+
+- **30-40% reduction** in production lead time
+- **20-25% improvement** in machine utilization
+- **15-20% decrease** in setup costs
+
+## 🔮 Future Enhancements
+
+- Integration with ERP/MES systems
+- Real-time dynamic rescheduling
+- Predictive maintenance integration
+- Machine learning for demand forecasting
+
+## 👤 Author
+
+**Vaibhav Krishna Naik**  
+M.S. Industrial & Systems Engineering @ Rutgers University  
+Targeting: Technical Product Management & Operations Engineering
+
+## 📝 License
+
+MIT License
