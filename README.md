@@ -1,60 +1,93 @@
-# semiconductor-defect-analysis
-Machine learning model for detecting and classifying semiconductor wafer defects using Python and scikit-learn
 # Semiconductor Defect Analysis
 
-Machine learning model for detecting and classifying semiconductor wafer defects to improve manufacturing quality control.
+Machine learning starter project for detecting and classifying semiconductor wafer defects using Python and scikit-learn.
 
-## 🎯 Project Overview
+## Project Overview
 
-This project develops a predictive model that identifies and classifies defects in semiconductor wafers during the manufacturing process, enabling early detection and reducing production costs.
+This project trains a supervised model on wafer process and inspection features to classify defect patterns such as scratches, particle defects, edge-ring issues, contamination, and normal wafers. It is designed as a clean baseline that can be extended with real manufacturing data, richer feature engineering, and image-based analysis.
 
-## 🛠️ Technologies Used
+## Technologies
 
-- **Python 3.x**
-- **Pandas & NumPy** — Data manipulation
-- **Scikit-learn** — Machine learning algorithms
-- **Matplotlib & Seaborn** — Data visualization
-- **OpenCV** — Image processing (optional)
+- Python 3.10+
+- pandas and NumPy for data preparation
+- scikit-learn for modeling
+- matplotlib and seaborn for evaluation visuals
+- joblib for saving trained models
 
-## 📊 Key Features
+## Project Structure
 
-- Defect detection using supervised learning
-- Multi-class classification of defect types
-- Data preprocessing and feature engineering
-- Model evaluation with confusion matrix and ROC curves
-- Performance metrics: accuracy, precision, recall, F1-score
-
-## 🚀 Project Structure
+```text
 semiconductor-defect-analysis/
-├── README.md
-├── requirements.txt
 ├── data/
 │   └── sample_data.csv
 ├── notebooks/
 │   └── exploratory_analysis.ipynb
+├── results/
+│   └── .gitkeep
 ├── src/
+│   ├── __init__.py
 │   ├── data_preprocessing.py
-│   ├── model_training.py
-│   └── evaluation.py
-└── results/
-└── performance_metrics.png
+│   ├── evaluation.py
+│   └── model_training.py
+├── requirements.txt
+└── README.md
+```
 
-## 📈 Results
+## Quick Start
 
-*Results will be updated after model development and testing*
+Create and activate a virtual environment:
 
-## 🔮 Future Enhancements
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
 
-- Deep learning models (CNN) for image-based defect detection
-- Real-time defect monitoring dashboard
-- Integration with Manufacturing Execution Systems (MES)
+Train the baseline model with the included sample data:
 
-## 👤 Author
+```powershell
+python -m src.model_training --data data/sample_data.csv --output-dir results
+```
 
-**Vaibhav Krishna Naik**  
-M.S. Industrial & Systems Engineering @ Rutgers University  
-Targeting: Technical Product Management & Operations Engineering
+After training, the `results/` folder will contain:
 
-## 📝 License
+- `defect_classifier.joblib`
+- `metrics.json`
+- `confusion_matrix.png`
+
+## Dataset
+
+The sample dataset is synthetic and meant for development only. Replace `data/sample_data.csv` with real process, metrology, or inspection data before drawing manufacturing conclusions.
+
+Expected target column:
+
+- `defect_type`
+
+Example feature columns:
+
+- `temperature_c`
+- `pressure_torr`
+- `etch_rate_nm_min`
+- `deposition_thickness_nm`
+- `surface_roughness_nm`
+- `particle_count`
+- `line_width_variation_nm`
+- `voltage_v`
+- `current_a`
+- `lot_id`
+
+## Next Enhancements
+
+- Add real wafer inspection data
+- Expand feature engineering for process drift and tool-level signals
+- Add cross-validation and hyperparameter tuning
+- Add CNN-based image classification for wafer maps or microscope images
+- Build a dashboard for model results and manufacturing quality trends
+
+## Author
+
+Vaibhav Krishna Naik
+
+## License
 
 MIT License
