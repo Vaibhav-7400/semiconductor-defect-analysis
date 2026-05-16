@@ -8,6 +8,12 @@ Semiconductor manufacturing depends on early defect detection to protect yield, 
 
 The repository includes a training pipeline, synthetic sample wafer data, evaluation outputs, and a Streamlit dashboard for exploring the dataset, training a baseline model, reviewing performance, and testing single-wafer predictions.
 
+## Live Demo
+
+Explore the deployed dashboard:
+
+https://semiconductor-defect-analysis-m9ojmtnsjbyietv9sae4z8.streamlit.app/
+
 ## Key Features
 
 - Baseline Random Forest classifier for multi-class defect prediction
