@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 import streamlit as st
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
     accuracy_score,
@@ -20,7 +19,9 @@ from sklearn.metrics import (
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
-from src.data_preprocessing import TARGET_COLUMN, build_preprocessor, split_features_target
+from src.data_preprocessing import TARGET_COLUMN, split_features_target
+from src.evaluation import cross_validate_classifier
+from src.model_training import build_classifier_pipeline, recommended_cv_folds
 
 
 APP_DIR = Path(__file__).resolve().parent
@@ -50,7 +51,7 @@ def train_dashboard_model(
     test_size: float,
     n_estimators: int,
     random_state: int,
-) -> tuple[Pipeline, pd.DataFrame, pd.Series, pd.Series, dict[str, float]]:
+) -> tuple[Pipeline, pd.DataFrame, pd.Series, pd.Series, dict[str, Any]]:
     features, target = split_features_target(data)
 
     stratify = target if target.value_counts().min() >= 2 else None
@@ -62,22 +63,15 @@ def train_dashboard_model(
         stratify=stratify,
     )
 
-    model = Pipeline(
-        steps=[
-            ("preprocessor", build_preprocessor(x_train)),
-            (
-                "classifier",
-                RandomForestClassifier(
-                    n_estimators=n_estimators,
-                    random_state=random_state,
-                    class_weight="balanced",
-                ),
-            ),
-        ]
+    model = build_classifier_pipeline(
+        x_train,
+        n_estimators=n_estimators,
+        random_state=random_state,
     )
     model.fit(x_train, y_train)
 
     predictions = pd.Series(model.predict(x_test), index=x_test.index, name="prediction")
+    cv_folds = recommended_cv_folds(target)
     metrics = {
         "accuracy": accuracy_score(y_test, predictions),
         "precision_macro": precision_score(
@@ -85,6 +79,18 @@ def train_dashboard_model(
         ),
         "recall_macro": recall_score(y_test, predictions, average="macro", zero_division=0),
         "f1_macro": f1_score(y_test, predictions, average="macro", zero_division=0),
+        "cv_folds": cv_folds,
+        "cross_validation": cross_validate_classifier(
+            build_classifier_pipeline(
+                features,
+                n_estimators=n_estimators,
+                random_state=random_state,
+            ),
+            features,
+            target,
+            folds=cv_folds,
+            random_state=random_state,
+        ),
     }
     return model, x_test, y_test, predictions, metrics
 
@@ -157,12 +163,38 @@ def feature_importance_table(model: Pipeline) -> pd.DataFrame:
     )
 
 
-def render_metric_cards(data: pd.DataFrame, metrics: dict[str, float]) -> None:
-    metric_columns = st.columns(4)
+def render_metric_cards(data: pd.DataFrame, metrics: dict[str, Any]) -> None:
+    metric_columns = st.columns(5)
+    cv_f1 = metrics.get("cross_validation", {}).get("f1_macro", {}).get("mean")
     metric_columns[0].metric("Wafers", f"{len(data):,}")
     metric_columns[1].metric("Defect Classes", data[TARGET_COLUMN].nunique())
-    metric_columns[2].metric("Accuracy", f"{metrics['accuracy']:.1%}")
-    metric_columns[3].metric("Macro F1", f"{metrics['f1_macro']:.1%}")
+    metric_columns[2].metric("Holdout Accuracy", f"{metrics['accuracy']:.1%}")
+    metric_columns[3].metric("Holdout Macro F1", f"{metrics['f1_macro']:.1%}")
+    metric_columns[4].metric(
+        "CV Macro F1",
+        f"{cv_f1:.1%}" if cv_f1 is not None else "N/A",
+    )
+
+
+def cross_validation_table(metrics: dict[str, Any]) -> pd.DataFrame:
+    metric_labels = {
+        "accuracy": "Accuracy",
+        "precision_macro": "Precision (macro)",
+        "recall_macro": "Recall (macro)",
+        "f1_macro": "F1 (macro)",
+    }
+    rows = []
+    for metric_name, label in metric_labels.items():
+        values = metrics.get("cross_validation", {}).get(metric_name)
+        if values:
+            rows.append(
+                {
+                    "Metric": label,
+                    "Mean": values["mean"],
+                    "Std. Dev.": values["std"],
+                }
+            )
+    return pd.DataFrame(rows)
 
 
 def render_prediction_lab(model: Pipeline, data: pd.DataFrame) -> None:
@@ -254,8 +286,14 @@ def main() -> None:
             st.dataframe(feature_importance_table(model).head(12), width="stretch")
 
         st.subheader("Model Metrics")
+        holdout_metrics = {
+            "accuracy": metrics["accuracy"],
+            "precision_macro": metrics["precision_macro"],
+            "recall_macro": metrics["recall_macro"],
+            "f1_macro": metrics["f1_macro"],
+        }
         st.dataframe(
-            pd.DataFrame([metrics]).rename(
+            pd.DataFrame([holdout_metrics]).rename(
                 columns={
                     "accuracy": "Accuracy",
                     "precision_macro": "Precision (macro)",
@@ -265,6 +303,14 @@ def main() -> None:
             ),
             width="stretch",
         )
+
+        st.subheader("Cross-Validation Metrics")
+        cv_table = cross_validation_table(metrics)
+        if cv_table.empty:
+            st.info("Cross-validation needs at least two records in every defect class.")
+        else:
+            st.caption(f"Stratified {metrics['cv_folds']}-fold cross-validation")
+            st.dataframe(cv_table, width="stretch")
 
     with prediction_tab:
         render_prediction_lab(model, data)

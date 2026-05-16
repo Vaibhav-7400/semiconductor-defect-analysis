@@ -11,7 +11,41 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
 from src.data_preprocessing import build_preprocessor, load_wafer_data, split_features_target
-from src.evaluation import evaluate_classifier, save_confusion_matrix, save_metrics
+from src.evaluation import (
+    cross_validate_classifier,
+    evaluate_classifier,
+    save_confusion_matrix,
+    save_metrics,
+)
+
+
+def build_classifier_pipeline(
+    features,
+    n_estimators: int = 200,
+    random_state: int = 42,
+) -> Pipeline:
+    """Build the preprocessing and Random Forest classification pipeline."""
+    return Pipeline(
+        steps=[
+            ("preprocessor", build_preprocessor(features)),
+            (
+                "classifier",
+                RandomForestClassifier(
+                    n_estimators=n_estimators,
+                    random_state=random_state,
+                    class_weight="balanced",
+                ),
+            ),
+        ]
+    )
+
+
+def recommended_cv_folds(target, max_folds: int = 5) -> int:
+    """Choose a safe stratified cross-validation fold count for the dataset."""
+    min_class_count = int(target.value_counts().min())
+    if min_class_count < 2:
+        return 0
+    return min(max_folds, min_class_count)
 
 
 def train_model(
@@ -33,18 +67,10 @@ def train_model(
         stratify=stratify,
     )
 
-    model = Pipeline(
-        steps=[
-            ("preprocessor", build_preprocessor(x_train)),
-            (
-                "classifier",
-                RandomForestClassifier(
-                    n_estimators=200,
-                    random_state=random_state,
-                    class_weight="balanced",
-                ),
-            ),
-        ]
+    model = build_classifier_pipeline(
+        x_train,
+        n_estimators=200,
+        random_state=random_state,
     )
 
     model.fit(x_train, y_train)
@@ -53,6 +79,15 @@ def train_model(
     output_path.mkdir(parents=True, exist_ok=True)
 
     metrics = evaluate_classifier(model, x_test, y_test)
+    cv_folds = recommended_cv_folds(target)
+    metrics["cv_folds"] = cv_folds
+    metrics["cross_validation"] = cross_validate_classifier(
+        build_classifier_pipeline(features, n_estimators=200, random_state=random_state),
+        features,
+        target,
+        folds=cv_folds,
+        random_state=random_state,
+    )
     save_metrics(metrics, output_path / "metrics.json")
     save_confusion_matrix(model, x_test, y_test, output_path / "confusion_matrix.png")
     joblib.dump(model, output_path / "defect_classifier.joblib")
@@ -62,6 +97,9 @@ def train_model(
         "precision_macro": float(metrics["precision_macro"]),
         "recall_macro": float(metrics["recall_macro"]),
         "f1_macro": float(metrics["f1_macro"]),
+        "cv_f1_macro_mean": float(
+            metrics.get("cross_validation", {}).get("f1_macro", {}).get("mean", 0.0)
+        ),
     }
 
 

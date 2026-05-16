@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import matplotlib.pyplot as plt
+import pandas as pd
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
     accuracy_score,
@@ -16,6 +17,7 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
 )
+from sklearn.model_selection import StratifiedKFold, cross_validate
 
 
 def evaluate_classifier(model: Any, x_test: Any, y_test: Any) -> dict[str, Any]:
@@ -37,6 +39,35 @@ def evaluate_classifier(model: Any, x_test: Any, y_test: Any) -> dict[str, Any]:
             output_dict=True,
             zero_division=0,
         ),
+    }
+
+
+def cross_validate_classifier(
+    model: Any,
+    features: pd.DataFrame,
+    target: pd.Series,
+    folds: int,
+    random_state: int = 42,
+) -> dict[str, dict[str, float]]:
+    """Return cross-validation mean and standard deviation for core metrics."""
+    if folds < 2:
+        return {}
+
+    scoring = {
+        "accuracy": "accuracy",
+        "precision_macro": "precision_macro",
+        "recall_macro": "recall_macro",
+        "f1_macro": "f1_macro",
+    }
+    cv = StratifiedKFold(n_splits=folds, shuffle=True, random_state=random_state)
+    scores = cross_validate(model, features, target, cv=cv, scoring=scoring)
+
+    return {
+        metric_name: {
+            "mean": float(scores[f"test_{metric_name}"].mean()),
+            "std": float(scores[f"test_{metric_name}"].std()),
+        }
+        for metric_name in scoring
     }
 
 
