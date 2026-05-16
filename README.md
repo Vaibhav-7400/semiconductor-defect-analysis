@@ -6,7 +6,7 @@ Interactive machine learning project for detecting and classifying semiconductor
 
 Semiconductor manufacturing depends on early defect detection to protect yield, reduce scrap, and identify process drift before it reaches production scale. This project builds a supervised machine learning workflow that classifies wafer defect patterns such as scratches, particle defects, edge-ring issues, contamination, and normal wafers.
 
-The repository includes a training pipeline, synthetic sample wafer data, evaluation outputs, and a Streamlit dashboard for exploring the dataset, training a baseline model, reviewing performance, and testing single-wafer predictions.
+The repository includes a training pipeline, synthetic sample wafer data, evaluation outputs, and a Streamlit dashboard for exploring the dataset, training a baseline Random Forest model, reviewing performance, and testing single-wafer predictions.
 
 ## Live Demo
 
@@ -23,9 +23,9 @@ The repository includes a training pipeline, synthetic sample wafer data, evalua
 
 ## Tech Stack
 
-- Python 3.10+
+- Python 3.12.4 for local development
 - pandas and NumPy for data preparation
-- scikit-learn for modeling
+- scikit-learn Random Forest classifier for modeling
 - matplotlib and seaborn for visualization
 - Streamlit for the dashboard
 - joblib for model persistence
@@ -47,7 +47,7 @@ semiconductor-defect-analysis/
 |   `-- model_training.py
 |-- streamlit_app.py
 |-- requirements.txt
-`-- README.md\
+`-- README.md
 Quick Start
 Create and activate a virtual environment:
 
@@ -79,7 +79,7 @@ Example feature columns:
 
 temperature_c
 pressure_torr
-etch_rate_nm
+etch_rate_nm_min
 deposition_thickness_nm
 surface_roughness_nm
 particle_count
